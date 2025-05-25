@@ -8,14 +8,28 @@ public class MovingObstacle : MonoBehaviour
     [SerializeField] private Vector3 endPoint;
     [SerializeField] private float travelSpeed = 10f;
     private bool movingToEnd = true;
+    private bool initialMovingToEnd = true;
     private const float proximityThreshold = 0.5f;
     private Vector3 currentDestination;
     private BoxCollider boxCollider;
+    private float initialProgress;
 
     private void Start()
     {
         currentDestination = movingToEnd ? endPoint : startPoint;
+        initialMovingToEnd = movingToEnd;
         boxCollider = GetComponent<BoxCollider>();
+
+        float totalDistance = Vector3.Distance(startPoint, endPoint);
+        if (totalDistance > 0)
+        {
+            float distanceToStart = Vector3.Distance(transform.position, startPoint);
+            initialProgress = distanceToStart / totalDistance;
+        }
+        else
+        {
+            initialProgress = 0f;
+        }
     }
 
     private void FixedUpdate()
@@ -35,28 +49,27 @@ public class MovingObstacle : MonoBehaviour
         }
     }
 
+
+    public Vector3 GetPositionAtTime(float time)
+    {
+        if (travelSpeed <= 0) return transform.position;
+
+        float totalDistance = Vector3.Distance(startPoint, endPoint);
+        float travelTime = totalDistance / travelSpeed;
+        float fullCycleTime = travelTime * 2;
+
+        float adjustedTime = time + ((initialMovingToEnd ? initialProgress : (1 + 1 - initialProgress)) * travelTime);
+
+        float cycleTime = adjustedTime % fullCycleTime;
+        bool isMovingToEnd = cycleTime < travelTime;
+        float progress = isMovingToEnd ? cycleTime / travelTime : (fullCycleTime - cycleTime) / travelTime;
+
+        return Vector3.Lerp(startPoint, endPoint, progress);
+    }
+
     public bool Contains(PathNode node, float radiusBuffer = 2.5f)
     {
-        float timeSinceStart = node.TimeMoment - Time.fixedTime;
-        float cycleTime = Vector3.Distance(startPoint, endPoint) / travelSpeed * 2;
-        if (cycleTime <= 0) return false;
-
-        float normalizedTime = timeSinceStart % cycleTime;
-        if (normalizedTime < 0) normalizedTime += cycleTime;
-
-        float halfCycleTime = cycleTime / 2;
-        bool isMovingToEnd = normalizedTime < halfCycleTime;
-        float t = isMovingToEnd ? normalizedTime / halfCycleTime : (normalizedTime - halfCycleTime) / halfCycleTime;
-        Vector3 obstaclePosition;
-
-        if (isMovingToEnd)
-        {
-            obstaclePosition = Vector3.Lerp(startPoint, endPoint, t);
-        }
-        else
-        {
-            obstaclePosition = Vector3.Lerp(endPoint, startPoint, t);
-        }
+        Vector3 obstaclePosition = GetPositionAtTime(node.TimeMoment);
 
         Vector3 colliderCenter = obstaclePosition + boxCollider.center;
         Vector3 colliderSize = Vector3.Scale(boxCollider.size, transform.localScale) * 0.5f;

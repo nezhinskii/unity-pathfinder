@@ -108,7 +108,7 @@ namespace BaseAI
                 Vector3 direction = (end - start).normalized;
                 float distance = Vector3.Distance(start, end);
                 int steps = Mathf.CeilToInt(distance / stepSize);
-                for (int i = 0; i <= steps + 1; i++)
+                for (int i = 1; i <= steps; i++)
                 {
                     float t = (float)i / steps;
                     Vector3 point = Vector3.Lerp(start, end, t);
@@ -116,12 +116,16 @@ namespace BaseAI
                     PathNode tempNode = new PathNode(point, direction) { TimeMoment = pointTime };
                     foreach (MovingObstacle obstacle in cartographer.movingObstacles)
                     {
-                        if (obstacle.Contains(tempNode, 1.0f))
+                        if (obstacle.Contains(tempNode, 2.0f))
                         {
                             Debug.DrawLine(point - Vector3.one * 0.1f, point + Vector3.one * 0.1f, Color.red, 2.0f);
                             return false;
                         }
                     }
+                }
+
+                if (cartographer.pathNodes.Any((x) => Math.Abs(x.TimeMoment - copyNode.TimeMoment) < 2 && Vector3.Distance(copyNode.Position, x.Position) < 2.0f)) {
+                    return false;
                 }
             }
 
@@ -134,12 +138,6 @@ namespace BaseAI
             Vector3 targetPos = target.Position;
 
             RaycastHit[] hits = Physics.RaycastAll(nodePos, (targetPos - nodePos).normalized, Vector3.Distance(nodePos, targetPos), obstaclesLayerMask);
-
-            Debug.DrawRay(nodePos, (targetPos - nodePos).normalized * Vector3.Distance(nodePos, targetPos), Color.yellow, 2.0f);
-            foreach (var hit in hits)
-            {
-                Debug.DrawLine(hit.point - Vector3.one * 0.1f, hit.point + Vector3.one * 0.1f, Color.red, 2.0f);
-            }
 
             float angle = Mathf.Abs(Vector3.SignedAngle(node.Direction, targetPos - nodePos, Vector3.up)) / properties.rotationAngle;
             return node.TimeMoment + 2 * Vector3.Distance(nodePos, targetPos) / properties.maxSpeed + angle * properties.deltaTime + hits.Length * 10;
@@ -287,6 +285,8 @@ namespace BaseAI
                 currentNode = currentNode.Parent;
             }
             result.Reverse();
+            cartographer.pathNodes.RemoveAll(x => x.TimeMoment < Time.time);
+            cartographer.pathNodes.AddRange(result);
             updater(result);
             Debug.Log("Финальная точка маршрута : " + result[result.Count - 1].Position.ToString() + "; target : " + target.Position.ToString());
             return result[result.Count - 1].TimeMoment - result[0].TimeMoment;

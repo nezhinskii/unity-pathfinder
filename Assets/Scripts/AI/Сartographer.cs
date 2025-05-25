@@ -19,6 +19,8 @@ namespace BaseAI
 
     public class Cartographer: MonoBehaviour
     {
+        public List<PathNode> pathNodes = new List<PathNode>();
+
         public List<MovingObstacle> movingObstacles = new List<MovingObstacle>();
         //  Список регионов
         public List<IBaseRegion> regions = new List<IBaseRegion>();
