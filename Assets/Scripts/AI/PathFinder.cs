@@ -97,26 +97,32 @@ namespace BaseAI
                 // Проверяем, что сфера на позиции будущего узла не пересекает препятствия
                 if (Physics.CheckSphere(nodePos, 1.0f, obstaclesLayerMask))
                     return false;
-
-                // Проверяем, что прямая между текущим узлом и будущим узлом не пересекает препятствия
-                /*Vector3 start = node.Parent.Position;
-                Vector3 end = nodePos;
-                Vector3 direction = (end - start).normalized;
-                float distance = Vector3.Distance(start, end);
-                int steps = Mathf.CeilToInt(distance / 2.0f);
-
-                for (int i = 1; i <= steps; i++)
-                {
-                    Vector3 point = start + direction * (i * 2.0f);
-                    if (Physics.CheckSphere(point, 1.0f, obstaclesLayerMask))
-                    {
-                        Debug.DrawLine(point - Vector3.one * 0.1f, point + Vector3.one * 0.1f, Color.magenta, 2.0f);
-                        return false;
-                    }
-                    Debug.DrawLine(point - Vector3.one * 0.1f, point + Vector3.one * 0.1f, Color.green, 2.0f);
-                }*/
                 if (Physics.Linecast(node.Parent.Position, nodePos, obstaclesLayerMask))
                     return false;
+
+                Vector3 start = node.Parent.Position;
+                Vector3 end = node.Position;
+                float startTime = node.Parent.TimeMoment;
+                float endTime = node.TimeMoment;
+                float stepSize = 0.05f;
+                Vector3 direction = (end - start).normalized;
+                float distance = Vector3.Distance(start, end);
+                int steps = Mathf.CeilToInt(distance / stepSize);
+                for (int i = 0; i <= steps + 1; i++)
+                {
+                    float t = (float)i / steps;
+                    Vector3 point = Vector3.Lerp(start, end, t);
+                    float pointTime = Mathf.Lerp(startTime, endTime, t);
+                    PathNode tempNode = new PathNode(point, direction) { TimeMoment = pointTime };
+                    foreach (MovingObstacle obstacle in cartographer.movingObstacles)
+                    {
+                        if (obstacle.Contains(tempNode, 1.0f))
+                        {
+                            Debug.DrawLine(point - Vector3.one * 0.1f, point + Vector3.one * 0.1f, Color.red, 2.0f);
+                            return false;
+                        }
+                    }
+                }
             }
 
             return true;
@@ -135,10 +141,8 @@ namespace BaseAI
                 Debug.DrawLine(hit.point - Vector3.one * 0.1f, hit.point + Vector3.one * 0.1f, Color.red, 2.0f);
             }
 
-            Collider[]  colliders = Physics.OverlapSphere(nodePos, 5.0f, obstaclesLayerMask);
-
             float angle = Mathf.Abs(Vector3.SignedAngle(node.Direction, targetPos - nodePos, Vector3.up)) / properties.rotationAngle;
-            return node.TimeMoment + 2 * Vector3.Distance(nodePos, targetPos) / properties.maxSpeed + angle * properties.deltaTime + hits.Length * 10 + colliders.Length * 10;
+            return node.TimeMoment + 2 * Vector3.Distance(nodePos, targetPos) / properties.maxSpeed + angle * properties.deltaTime + hits.Length * 10;
         }
 
         /// <summary>

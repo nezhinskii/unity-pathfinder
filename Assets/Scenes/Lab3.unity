@@ -1504,7 +1504,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startPoint: {x: 38.5, y: 10.662, z: 81.5}
   endPoint: {x: 38.5, y: 10.662, z: 18.5}
-  travelSpeed: 15
+  travelSpeed: 20
 --- !u!1 &1072126155
 GameObject:
   m_ObjectHideFlags: 0
@@ -1757,7 +1757,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   startPoint: {x: 60, y: 10.662, z: 18.5}
   endPoint: {x: 60, y: 10.662, z: 81.5}
-  travelSpeed: 15
+  travelSpeed: 20
 --- !u!1 &1316958689
 GameObject:
   m_ObjectHideFlags: 0
@@ -2904,7 +2904,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13d3f93eb286c5d428125b767a0a1792, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CollidersCollection: {fileID: 594809429}
+  CollidersCollection: {fileID: 254032414}
 --- !u!1 &2014405642
 GameObject:
   m_ObjectHideFlags: 0
@@ -3465,7 +3465,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2452039304347806846, guid: 041ccb340345b9e478f98f4a94533019, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 79.1
+      value: 45.56
       objectReference: {fileID: 0}
     - target: {fileID: 2452039304347806846, guid: 041ccb340345b9e478f98f4a94533019, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3473,7 +3473,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2452039304347806846, guid: 041ccb340345b9e478f98f4a94533019, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 64.5
+      value: 25.79
       objectReference: {fileID: 0}
     - target: {fileID: 2452039304347806846, guid: 041ccb340345b9e478f98f4a94533019, type: 3}
       propertyPath: m_LocalRotation.w

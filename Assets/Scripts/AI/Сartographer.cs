@@ -17,8 +17,9 @@ namespace BaseAI
     /// </summary>
 
 
-    public class Cartographer
+    public class Cartographer: MonoBehaviour
     {
+        public List<MovingObstacle> movingObstacles = new List<MovingObstacle>();
         //  Список регионов
         public List<IBaseRegion> regions = new List<IBaseRegion>();
 
@@ -29,6 +30,8 @@ namespace BaseAI
 
         public Cartographer(GameObject collidersCollection)
         {
+            MovingObstacle[] obstacles = FindObjectsOfType<MovingObstacle>();
+            movingObstacles.AddRange(obstacles);
             regions = new List<IBaseRegion>();
             noTerrainRegions = new List<IBaseRegion>();
             SceneTerrain = Terrain.activeTerrain;
