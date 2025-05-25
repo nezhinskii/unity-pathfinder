@@ -9,14 +9,14 @@ namespace BaseAI
     /// </summary>
     public class PathNode//: MonoBehaviour
     {
-        public bool PositionIsLocal {  get; set; }
+        public bool PositionIsLocal { get; set; }
         public Vector3 Position { get; set; }         //  Позиция в глобальных координатах
         public Vector3 Direction { get; set; }        //  Направление
         public float TimeMoment { get; set; }         //  Момент времени       
         /// <summary>
         /// Нужно ли из этой вершины прыгать
         /// </summary>
-        public bool JumpNode { get; set; } = false; 
+        public bool JumpNode { get; set; } = false;
         /// <summary>
         /// Родительская вершина - предшествующая текущей в пути от начальной к целевой
         /// </summary>
@@ -28,7 +28,7 @@ namespace BaseAI
         /// Предположительный индекс региона, в котором находится точка. Проблема в том, что регионы могут накладываться
         /// друг на друга, и этот индекс может не соответствовать тому, который нам нужен
         /// </summary>
-        public int RegionIndex = -1;  
+        public int RegionIndex = -1;
 
         /// <summary>
         /// Конструирование вершины на основе родительской (если она указана)
@@ -69,6 +69,23 @@ namespace BaseAI
             return Vector3.Distance(Position, other.Position);
         }
 
+        public Vector3 PredictPosition(Cartographer cartographer)
+        {
+            return cartographer.regions[RegionIndex].PredictPosition(this, TimeMoment - Time.time);
+        }
+
+        public Vector3 PredictPosition(Cartographer cartographer, float TimeMoment)
+        {
+            return cartographer.regions[RegionIndex].PredictPosition(this, TimeMoment - Time.time);
+        }
+
+        public void PredictTransformPoint(Cartographer cartographer, PathNode parent)
+        {
+            float timeDelta = TimeMoment - parent.TimeMoment;
+            Direction = cartographer.regions[RegionIndex].PredictDirection(this, timeDelta);
+            Position = cartographer.regions[RegionIndex].PredictPosition(this, timeDelta);
+        }
+
         /// <summary>
         /// Расстояние между точками без учёта времени. Со временем - отдельная история
         /// Если мы рассматриваем расстояние до целевой вершины, то непонятно как учитывать время
@@ -105,7 +122,7 @@ namespace BaseAI
 
             //  Момент времени считаем
             result.TimeMoment = TimeMoment + timeDelta;
-            
+
             result.RegionIndex = RegionIndex;
 
             result.PositionIsLocal = PositionIsLocal;
@@ -138,8 +155,8 @@ namespace BaseAI
             //  Момент времени считаем
             result.TimeMoment = TimeMoment + mp.jumpTime;
 
-            //  Индекс региона должен быть пересчитан
-            result.RegionIndex = -1;
+            //  Индекс региона должен быть пересчитан ????
+            result.RegionIndex = RegionIndex;
 
             result.JumpNode = true;
 
@@ -154,12 +171,17 @@ namespace BaseAI
         /// <param name="distDelta">Шаг дискретизации по пространству</param>
         /// <param name="timeDelta">Шаг дискретизации по времени</param>
         /// <returns>Четыре координаты (пространство-время)</returns>
-        public (int, int, int, int) ToGrid4DPoint(float distDelta, float timeDelta)
+        public (int, int, int, int, int, int, int) ToGridPoint(float distDelta, float timeDelta)
         {
-            return (Mathf.RoundToInt(Position.x / distDelta),
+            return (
+                Mathf.RoundToInt(Position.x / distDelta),
                 Mathf.RoundToInt(Position.y / distDelta),
                 Mathf.RoundToInt(Position.z / distDelta),
-                Mathf.RoundToInt(TimeMoment / timeDelta));
+                Mathf.RoundToInt(TimeMoment / timeDelta),
+                Mathf.RoundToInt(Direction.x / distDelta),
+                Mathf.RoundToInt(Direction.y / distDelta),
+                Mathf.RoundToInt(Direction.z / distDelta)
+                );
         }
     }
 }

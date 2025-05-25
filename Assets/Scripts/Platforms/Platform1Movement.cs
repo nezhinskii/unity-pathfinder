@@ -14,7 +14,7 @@ public class Platform1Movement : MonoBehaviour, BaseAI.IBaseRegion
     /// <summary>
     /// Тело региона - коллайдер
     /// </summary>
-    public SphereCollider body;
+    public Collider body;
 
     /// <summary>
     /// Индекс региона в списке регионов
@@ -66,14 +66,14 @@ public class Platform1Movement : MonoBehaviour, BaseAI.IBaseRegion
         }
     }
 
-    void IBaseRegion.TransformPoint(PathNode parent, PathNode node) {
-        
+    void IBaseRegion.TransformPoint(PathNode parent, PathNode node)
+    {
+
         float timeDelta = node.TimeMoment - parent.TimeMoment;
 
         Vector3 dir = node.Position - rotationCenter;
         node.Position = rotationCenter + Quaternion.AngleAxis(-rotationSpeed * timeDelta, Vector3.up) * dir;
         node.Direction = Quaternion.AngleAxis(-rotationSpeed * timeDelta, Vector3.up) * node.Direction;
-        return;
     }
 
     Vector3 IBaseRegion.PredictPosition(PathNode node, float timeDelta)
@@ -87,7 +87,7 @@ public class Platform1Movement : MonoBehaviour, BaseAI.IBaseRegion
         return Quaternion.AngleAxis(rotationSpeed * timeDelta, Vector3.up) * node.Direction;
     }
 
-    void IBaseRegion.TransformGlobalToLocal(PathNode node) 
+    void IBaseRegion.TransformGlobalToLocal(PathNode node)
     {
         //  Вот тут всё плохо - определяем момент времени, через который нам нужна точка
         float timeDelta = node.TimeMoment - Time.time;
@@ -135,33 +135,41 @@ public class Platform1Movement : MonoBehaviour, BaseAI.IBaseRegion
         return result;
     }
 
+    // bool IBaseRegion.Contains(PathNode node)
+    // {
+    //     //  Самая жуткая функция - тут думать надо
+    //     //  Вывести точку через 2 секунды - положение платформы через 2 секунды в будущем
+    //     float deltaTime = node.TimeMoment - Time.time;
+    //     if (deltaTime < 0) return false;
+
+    //     // DEBUG INFO
+    //     var center = transform.position;
+    //     var centerDir = center - rotationCenter;
+    //     var newCenterPoint = rotationCenter + Quaternion.AngleAxis(rotationSpeed * deltaTime, Vector3.up) * centerDir;
+    //     if (node.JumpNode)
+    //     {
+    //         Debug.Log(node.Position + " : " + newCenterPoint);
+    //     }
+    //     // DEBUG INFO
+
+    //     Vector3 dir = node.Position - rotationCenter;
+    //     Vector3 newPoint = rotationCenter + Quaternion.AngleAxis(-rotationSpeed * deltaTime, Vector3.up) * dir;
+    //     //  Осторожно! Тут два коллайдера у объекта, проверить какой именно вытащили.
+    //     var coll = GetComponent<Collider>();
+    //     return coll != null && coll.bounds.Contains(newPoint);
+    // }
+
     bool IBaseRegion.Contains(PathNode node)
     {
-        //  Самая жуткая функция - тут думать надо
-        //  Вывести точку через 2 секунды - положение платформы через 2 секунды в будущем
         float deltaTime = node.TimeMoment - Time.time;
-        if (deltaTime < 0) return false;
-
-        // DEBUG INFO
-        var center = transform.position;
-        var centerDir = center - rotationCenter;
-        var newCenterPoint = rotationCenter + Quaternion.AngleAxis(rotationSpeed * deltaTime, Vector3.up) * centerDir;
-        if (node.JumpNode)
-        {
-            Debug.Log(node.Position + " : " + newCenterPoint);
-        }
-        // DEBUG INFO
-
         Vector3 dir = node.Position - rotationCenter;
         Vector3 newPoint = rotationCenter + Quaternion.AngleAxis(-rotationSpeed * deltaTime, Vector3.up) * dir;
-        //  Осторожно! Тут два коллайдера у объекта, проверить какой именно вытащили.
-        var coll = GetComponent<Collider>();
-        return coll != null && coll.bounds.Contains(newPoint);
+        return body.bounds.Contains(newPoint);
     }
 
     Vector3 IBaseRegion.GetCenter()
     {
-        return transform.position;
+        return body.bounds.center;
     }
 
     float IBaseRegion.SqrDistanceTo(PathNode node)
