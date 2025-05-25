@@ -78,7 +78,7 @@ namespace BaseAI
             {
                 //  Технически, тут можно как-то корректировать высоту - с небольшим шагом, позволить объекту спускаться или подниматься, но в целом это проверку пока что можно отключить
                 float distToFloor = nodePos.y - cartographer.SceneTerrain.SampleHeight(nodePos);
-                if (distToFloor > 2.0f || distToFloor < 0.0f)
+                if (distToFloor > 3.0f || distToFloor < 0.2f)
                 {
                     //Debug.Log("Incorrect node height");
                     return false;
@@ -92,18 +92,53 @@ namespace BaseAI
 
             //if (node.Parent != null && Physics.CheckSphere(node.Position, 2.0f, obstaclesLayerMask))
             //if (node.Parent != null && Physics.Linecast(node.Parent.Position, node.Position, obstaclesLayerMask))
-            if (node.Parent != null && Physics.CheckSphere(nodePos, 1.0f, obstaclesLayerMask))
-                return false;
+            if (node.Parent != null)
+            {
+                // Проверяем, что сфера на позиции будущего узла не пересекает препятствия
+                if (Physics.CheckSphere(nodePos, 1.0f, obstaclesLayerMask))
+                    return false;
+
+                // Проверяем, что прямая между текущим узлом и будущим узлом не пересекает препятствия
+                /*Vector3 start = node.Parent.Position;
+                Vector3 end = nodePos;
+                Vector3 direction = (end - start).normalized;
+                float distance = Vector3.Distance(start, end);
+                int steps = Mathf.CeilToInt(distance / 2.0f);
+
+                for (int i = 1; i <= steps; i++)
+                {
+                    Vector3 point = start + direction * (i * 2.0f);
+                    if (Physics.CheckSphere(point, 1.0f, obstaclesLayerMask))
+                    {
+                        Debug.DrawLine(point - Vector3.one * 0.1f, point + Vector3.one * 0.1f, Color.magenta, 2.0f);
+                        return false;
+                    }
+                    Debug.DrawLine(point - Vector3.one * 0.1f, point + Vector3.one * 0.1f, Color.green, 2.0f);
+                }*/
+                if (Physics.Linecast(node.Parent.Position, nodePos, obstaclesLayerMask))
+                    return false;
+            }
 
             return true;
         }
 
         private float Heur(PathNode node, PathNode target, MovementProperties properties)
         {
-            Vector3 nodePos = node.Position;
+            Vector3 nodePos = new Vector3(node.Position.x, target.Position.y, node.Position.z);
             Vector3 targetPos = target.Position;
+
+            RaycastHit[] hits = Physics.RaycastAll(nodePos, (targetPos - nodePos).normalized, Vector3.Distance(nodePos, targetPos), obstaclesLayerMask);
+
+            Debug.DrawRay(nodePos, (targetPos - nodePos).normalized * Vector3.Distance(nodePos, targetPos), Color.yellow, 2.0f);
+            foreach (var hit in hits)
+            {
+                Debug.DrawLine(hit.point - Vector3.one * 0.1f, hit.point + Vector3.one * 0.1f, Color.red, 2.0f);
+            }
+
+            Collider[]  colliders = Physics.OverlapSphere(nodePos, 5.0f, obstaclesLayerMask);
+
             float angle = Mathf.Abs(Vector3.SignedAngle(node.Direction, targetPos - nodePos, Vector3.up)) / properties.rotationAngle;
-            return node.TimeMoment + 2 * Vector3.Distance(nodePos, targetPos) / properties.maxSpeed + angle * properties.deltaTime;
+            return node.TimeMoment + 2 * Vector3.Distance(nodePos, targetPos) / properties.maxSpeed + angle * properties.deltaTime + hits.Length * 10 + colliders.Length * 10;
         }
 
         /// <summary>

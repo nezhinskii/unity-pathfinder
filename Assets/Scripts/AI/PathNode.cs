@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ namespace BaseAI
     /// </summary>
     public class PathNode//: MonoBehaviour
     {
+        public bool NeedRotating { get; set; }
+        public bool NeedMovement { get; set; }
         public bool PositionIsLocal { get; set; }
         public Vector3 Position { get; set; }         //  Позиция в глобальных координатах
         public Vector3 Direction { get; set; }        //  Направление
@@ -52,6 +55,8 @@ namespace BaseAI
             RegionIndex = -1;
             H = 0;
             PositionIsLocal = false;
+            NeedMovement = false;
+            NeedRotating = false;
         }
 
         /// <summary>
@@ -127,6 +132,9 @@ namespace BaseAI
 
             result.PositionIsLocal = PositionIsLocal;
 
+            result.NeedMovement = stepLength > 1e-5;
+            result.NeedRotating = Math.Abs(rotationAngle) > 1e-5;
+
             //  Добавка для эвристики - нужна ли?
             //if (Mathf.Abs(rotationAngle) > 0.001f) result.TimeMoment += 0.3f;
 
@@ -159,6 +167,9 @@ namespace BaseAI
             result.RegionIndex = RegionIndex;
 
             result.JumpNode = true;
+
+            result.NeedMovement = false;
+            result.NeedRotating = false;
 
             return result;
         }

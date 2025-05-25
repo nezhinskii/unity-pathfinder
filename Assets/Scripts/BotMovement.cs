@@ -328,13 +328,7 @@ public class BotMovement : MonoBehaviour
 
         //  Определяем угол поворота, и расстояние до целевой
         Vector3 currPostition;
-        if (currentTarget.PositionIsLocal && false)
-        {
-            currPostition = new Vector3(transform.localPosition.x, currentTarget.Position.y, transform.localPosition.z);
-        } else
-        {
-            currPostition = new Vector3(transform.position.x, currentTarget.Position.y, transform.position.z);
-        }
+        currPostition = new Vector3(transform.position.x, currentTarget.Position.y, transform.position.z);
         Vector3 directionToTarget = currentTarget.Position - currPostition;
         float angle;
         bool onlyRotating;
@@ -346,7 +340,7 @@ public class BotMovement : MonoBehaviour
         {
             currDirection = transform.forward;
         }
-        if (directionToTarget.magnitude < 1e-3)
+        if (directionToTarget.magnitude < 1e-3 || !currentTarget.NeedMovement)
         {
             angle = Vector3.SignedAngle(currDirection, currentTarget.Direction, Vector3.up);
             onlyRotating = Mathf.Abs(angle) > movementProperties.rotationAngle + 1e-3;
@@ -367,15 +361,13 @@ public class BotMovement : MonoBehaviour
         float actualStep = Mathf.Clamp(stepLength, 0.0f, movementProperties.maxSpeed * Time.deltaTime);
         //  Поворот может быть проблемой, если слишком близко подошли к целевой точке
         //  Надо как-то следить за скоростью, она не может превышать расстояние до целевой точки???
-        if (currentTarget.PositionIsLocal && false)
-        {
-            transform.localRotation *= Quaternion.AngleAxis(angle, Vector3.up);
-        }
-        else
+
+        if (currentTarget.NeedRotating || onlyRotating)
         {
             transform.Rotate(Vector3.up, angle, Space.World);
         }
-        if (onlyRotating || directionToTarget.magnitude < 1e-3)
+
+        if (onlyRotating || directionToTarget.magnitude < 1e-3 || !currentTarget.NeedMovement)
         {
             return false;
         }
@@ -383,14 +375,7 @@ public class BotMovement : MonoBehaviour
         var remainedTime = currentTarget.TimeMoment - Time.fixedTime;
         if (remainedTime < movementProperties.epsilon)
         {
-            if (currentTarget.PositionIsLocal && false)
-            {
-                transform.localPosition = transform.localPosition + actualStep * transform.forward;
-            }
-            else
-            {
-                transform.position = transform.position + actualStep * transform.forward;
-            }
+            transform.position = transform.position + actualStep * transform.forward;
         }
         else
         {
@@ -398,13 +383,7 @@ public class BotMovement : MonoBehaviour
             if (currentTarget.Distance(currPostition) < movementProperties.epsilon)
                 return true;
 
-            if (currentTarget.PositionIsLocal && false)
-            {
-                transform.localPosition = transform.localPosition + actualStep * transform.forward / remainedTime;
-            } else
-            {
-                transform.position = transform.position + actualStep * transform.forward / remainedTime;
-            }
+            transform.position = transform.position + actualStep * transform.forward / remainedTime;
         }
         return true;
     }

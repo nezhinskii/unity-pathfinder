@@ -45,32 +45,83 @@ namespace BaseAI
             for (int i = 0; i < regions.Count; ++i)
                 Debug.Log("Region : " + i + " -> " + regions[i].GetCenter().ToString());
 
-            regions[0].Neighbors.Add(regions[1]);
-            regions[0].Neighbors.Add(regions[3]);
+            if (regions.Count < 2)
+            {
+                return;
+            }
 
-            regions[1].Neighbors.Add(regions[0]);
-            regions[1].Neighbors.Add(regions[2]);
+            if (regions.Count == 13) // Сцена Лаб3
+            {
+                regions[0].Neighbors.Add(regions[1]);
 
-            regions[2].Neighbors.Add(regions[1]);
-            regions[2].Neighbors.Add(regions[4]);
+                regions[1].Neighbors.Add(regions[0]);
+                regions[1].Neighbors.Add(regions[2]);
 
-            regions[3].Neighbors.Add(regions[0]);
-            regions[3].Neighbors.Add(regions[5]);
+                regions[2].Neighbors.Add(regions[1]);
+                regions[2].Neighbors.Add(regions[3]);
 
-            regions[4].Neighbors.Add(regions[2]);
+                regions[3].Neighbors.Add(regions[2]);
+                regions[3].Neighbors.Add(regions[4]);
 
-            regions[5].Neighbors.Add(regions[3]);
-            regions[5].Neighbors.Add(regions[6]);
+                regions[4].Neighbors.Add(regions[3]);
+                regions[4].Neighbors.Add(regions[5]);
+                regions[4].Neighbors.Add(regions[6]);
 
-            regions[6].Neighbors.Add(regions[5]);
-            regions[6].Neighbors.Add(regions[7]);
+                regions[5].Neighbors.Add(regions[4]);
+                regions[5].Neighbors.Add(regions[7]);
 
-            regions[7].Neighbors.Add(regions[6]);
-            regions[7].Neighbors.Add(regions[8]);
+                regions[6].Neighbors.Add(regions[4]);
+                regions[6].Neighbors.Add(regions[7]);
 
-            regions[8].Neighbors.Add(regions[9]);
+                regions[7].Neighbors.Add(regions[5]);
+                regions[7].Neighbors.Add(regions[6]);
+                regions[7].Neighbors.Add(regions[8]);
+                regions[7].Neighbors.Add(regions[9]);
 
-            regions[9].Neighbors.Add(regions[8]);
+                regions[8].Neighbors.Add(regions[7]);
+                regions[8].Neighbors.Add(regions[10]);
+
+                regions[9].Neighbors.Add(regions[7]);
+                regions[9].Neighbors.Add(regions[10]);
+
+                regions[10].Neighbors.Add(regions[8]);
+                regions[10].Neighbors.Add(regions[9]);
+                regions[10].Neighbors.Add(regions[11]);
+
+                regions[11].Neighbors.Add(regions[10]);
+                regions[11].Neighbors.Add(regions[12]);
+
+                regions[12].Neighbors.Add(regions[11]);
+            }
+            else // Сцена Лаб2
+            {
+                regions[0].Neighbors.Add(regions[1]);
+                regions[0].Neighbors.Add(regions[3]);
+
+                regions[1].Neighbors.Add(regions[0]);
+                regions[1].Neighbors.Add(regions[2]);
+
+                regions[2].Neighbors.Add(regions[1]);
+                regions[2].Neighbors.Add(regions[4]);
+
+                regions[3].Neighbors.Add(regions[0]);
+                regions[3].Neighbors.Add(regions[5]);
+
+                regions[4].Neighbors.Add(regions[2]);
+
+                regions[5].Neighbors.Add(regions[3]);
+                regions[5].Neighbors.Add(regions[6]);
+
+                regions[6].Neighbors.Add(regions[5]);
+                regions[6].Neighbors.Add(regions[7]);
+
+                regions[7].Neighbors.Add(regions[6]);
+                regions[7].Neighbors.Add(regions[8]);
+
+                regions[8].Neighbors.Add(regions[9]);
+
+                regions[9].Neighbors.Add(regions[8]);
+            }
         }
 
         /// <summary>
